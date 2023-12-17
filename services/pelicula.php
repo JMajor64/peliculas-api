@@ -84,4 +84,33 @@ class Pelicula
             return $this->get( [ 'id = ' . $filmId ] )[0];
         }
     }
+
+    public function edit( $data )
+    {
+        $sql = "UPDATE peliculas SET titulo=" . $data[ 'title' ] . ",
+            fecha_estreno=" . $data[ 'release' ] . ",
+            duracion=" . $data[ 'length' ] . ",
+            genero_id=" . $data[ 'genre' ] . ",
+            director_id=" . $data[ 'director' ] . ",
+            descripcion=" . $data[ 'description' ] . "
+            WHERE id=" . $data[ 'id' ];
+        $this->db->update( $sql );
+
+        $sql = "DELETE FROM actor_pelicula WHERE pelicula_id=" . $data[ 'id' ];
+        $this->db->delete( $sql );
+
+        $cast = "";
+        foreach( explode( ",", $data[ 'cast' ] ) as $actor ) 
+        {
+            $cast .= $cast? "," : "";
+            $cast .= "(" . $actor . "," . $data[ 'id' ] . ")";
+        }
+        $sql = "INSERT INTO actor_pelicula
+                    (actor_id, pelicula_id)
+                    VALUES
+                    " . $cast;
+        $this->db->insert( $sql );
+        return $this->get( [ 'id = ' . $data[ 'id' ] ] )[0];
+        
+    }
 }
