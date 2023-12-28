@@ -15,10 +15,10 @@ class Pelicula
 
     public function get( $conditions = [] )
     {
-        $sql = "SELECT * FROM peliculas";
+        $sql = "SELECT * FROM peliculas WHERE deleted_at IS NULL";
         
         if( count( $conditions ) > 0 )
-            $sql .= " WHERE " . implode( ' AND ', $conditions );
+            $sql .= " AND " . implode( ' AND ', $conditions );
 
         $result = $this->db->select( $sql );
         if( $result && count( $result ) > 0 ) 
@@ -32,6 +32,12 @@ class Pelicula
             return $result;
         }
         return null;
+    }
+
+    public function findById( $id )
+    {
+        $films = $this->get( [ 'id = ' . $id ] );
+        return  $films? $films[0] : null;
     }
 
     public function getGenero( $id )
@@ -110,7 +116,17 @@ class Pelicula
                     VALUES
                     " . $cast;
         $this->db->insert( $sql );
-        return $this->get( [ 'id = ' . $data[ 'id' ] ] )[0];
-        
+        return $this->findById( $data[ 'id' ] );
+    }
+
+    public function delete( $id )
+    {
+        $film = $this->findById( $id );
+        if( $film )
+        {
+            $sql = "UPDATE peliculas SET deleted_at = NOW() WHERE id=" . $id;
+            $this->db->update( $sql );
+        }
+        return $film;
     }
 }
