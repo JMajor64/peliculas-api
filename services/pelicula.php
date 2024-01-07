@@ -13,13 +13,17 @@ class Pelicula
         $this->db->connect();
     }
 
-    public function get( $conditions = [] )
+    public function get( $conditions = [], $searchConditions = [] )
     {
         $sql = "SELECT * FROM peliculas WHERE deleted_at IS NULL";
         
         if( count( $conditions ) > 0 )
             $sql .= " AND " . implode( ' AND ', $conditions );
-
+        
+        if( count( $searchConditions ) > 0 )
+            $sql .= " AND (" . implode( " OR ", $searchConditions ) . ")";
+        // var_dump( $sql );
+        // die();
         $result = $this->db->select( $sql );
         if( $result && count( $result ) > 0 ) 
         {
